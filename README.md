@@ -70,7 +70,7 @@ JWT_SECRET=""
 Run the following command to start the server:
 
 ```bash
-npm start
+npm run start
 ```
 
 This will launch the server at `http://localhost:5000`.
