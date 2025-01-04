@@ -57,8 +57,8 @@ Create a `.env` file in the root of the project and add the following environmen
 
 ```env
 PORT=5000
-MONGO_URI="mongodb+srv://chanvithapraween:eMMkBgEP9dYGo3sd@assignment-backend.rgjel.mongodb.net/?retryWrites=true&w=majority&appName=assignment-backend"
-JWT_SECRET="hello"
+MONGO_URI=""
+JWT_SECRET=""
 ```
 
 - `MONGO_URI`: The URI of your MongoDB instance (can be a local or MongoDB Atlas URL).
