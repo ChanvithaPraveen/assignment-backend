@@ -18,21 +18,38 @@ exports.createUser = async (req, res) => {
 
 // Authenticate user
 exports.loginUser = async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Login successful', token });
-  } catch (error) {
-    res.status(500).json({ error: 'Login failed', details: error });
-  }
-};
+    const { username, password } = req.body;
+  
+    try {
+      // Find user by username
+      const user = await User.findOne({ username });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+  
+      // Check if the password matches
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+  
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id, role: user.role }, // Include role in the payload if required
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+  
+      // Exclude password from user data
+      const { password: _, ...userWithoutPassword } = user.toObject();
+  
+      // Return token and user data
+      res.json({
+        message: 'Login successful',
+        token,
+        user: userWithoutPassword,
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Login failed', details: error });
+    }
+  };
+  
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -57,14 +74,20 @@ exports.getUserById = async (req, res) => {
 
 // Update user
 exports.updateUser = async (req, res) => {
-  const { firstName, lastName } = req.body;
+    const { firstName, lastName, username } = req.body;
 
-  try {
-    const user = await User.findByIdAndUpdate(req.params.id, { firstName, lastName }, { new: true });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ message: 'User updated successfully', user });
-  } catch (error) {
-    res.status(500).json({ error: 'Error updating user', details: error });
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { firstName, lastName, username },
+        { new: true }
+      );
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ message: "User updated successfully", user });
+    } catch (error) {
+      res.status(500).json({ error: "Error updating user", details: error });
   }
 };
 
