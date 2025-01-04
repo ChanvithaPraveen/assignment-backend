@@ -2,7 +2,6 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register a new user
 exports.createUser = async (req, res) => {
   const { firstName, lastName, username, password } = req.body;
 
@@ -16,30 +15,24 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// Authenticate user
 exports.loginUser = async (req, res) => {
     const { username, password } = req.body;
   
     try {
-      // Find user by username
       const user = await User.findOne({ username });
       if (!user) return res.status(404).json({ error: 'User not found' });
   
-      // Check if the password matches
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
   
-      // Generate JWT token
       const token = jwt.sign(
-        { id: user._id, role: user.role }, // Include role in the payload if required
+        { id: user._id, role: user.role }, 
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
   
-      // Exclude password from user data
       const { password: _, ...userWithoutPassword } = user.toObject();
   
-      // Return token and user data
       res.json({
         message: 'Login successful',
         token,
@@ -51,7 +44,6 @@ exports.loginUser = async (req, res) => {
   };
   
 
-// Get all users
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password');
@@ -61,7 +53,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// Get single user
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -72,7 +63,6 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// Update user
 exports.updateUser = async (req, res) => {
     const { firstName, lastName, username } = req.body;
 
@@ -91,7 +81,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// Delete user
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
